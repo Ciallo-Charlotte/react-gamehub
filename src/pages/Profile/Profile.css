@@ -1,0 +1,264 @@
+.profile-container {
+  padding: 24px;
+  min-height: 80vh;
+}
+
+.profile-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+/* 未登录提示卡片 */
+.login-required-card,
+.not-authenticated {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.login-required-message,
+.not-authenticated p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #666;
+}
+
+/* 标签页样式 - 保留但可能会被侧边栏导航替代 */
+.profile-tabs {
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  margin-right: 10px;
+}
+
+/* 侧边栏布局样式 */
+.profile-layout {
+  height: 500px;
+  display: flex;
+}
+
+.profile-nav-sidebar {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  width: 200px !important;
+  flex-shrink: 0;
+}
+
+.profile-menu {
+  padding: 8px 0;
+}
+
+.profile-outlet {
+  padding: 24px;
+  background: #fff;
+  min-height: 280px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 头像部分 */
+.avatar-section,
+.avatar-uploader {
+  text-align: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #f0f0f0;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+.avatar-upload-text {
+  text-align: center;
+  margin-top: 8px;
+  color: #1890ff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 用户信息 */
+.user-info {
+  flex: 1;
+}
+
+.username {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.user-email {
+  margin: 0 0 15px 0;
+  color: #666;
+}
+
+/* 统计信息 */
+.user-stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-top: 16px;
+  gap: 20px;
+}
+
+.stat-item {
+  flex: 1;
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* 内容区域 */
+.profile-content {
+  padding: 16px 0;
+  margin-top: 16px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+/* 表单样式 */
+.profile-form {
+  margin-top: 16px;
+}
+
+.submit-button {
+  margin-top: 20px;
+}
+
+/* 收藏夹样式 */
+.favorites-container {
+  padding: 16px 0;
+}
+
+.favorite-game-card {
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-cover {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.game-name {
+  margin: 8px 0 4px;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-rating {
+  color: #faad14;
+  font-size: 14px;
+}
+
+.empty-favorites {
+  text-align: center;
+  padding: 60px 0;
+  color: #999;
+}
+
+.empty-favorites p {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* 设置页面样式 */
+.settings-container {
+  padding: 16px 0;
+}
+
+.settings-card,
+.security-card {
+  margin-bottom: 24px;
+}
+
+.setting-item,
+.security-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-item:last-child,
+.security-item:last-child {
+  border-bottom: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 10px;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .avatar-uploader {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+  
+  .user-stats {
+    justify-content: center;
+  }
+  
+  .favorite-game-card {
+    max-width: 100%;
+  }
+  
+  .setting-item,
+  .security-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .user-email {
+    font-size: 14px;
+  }
+  
+  .stat-item {
+    font-size: 12px;
+  }
+  
+  .game-cover {
+    height: 160px;
+  }
+}
