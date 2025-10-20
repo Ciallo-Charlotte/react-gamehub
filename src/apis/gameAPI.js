@@ -56,7 +56,7 @@ export const fetchGames = async (page = 1, pageSize = 10, filters = {}) => {
       params: {
         page,
         pageSize,
-        ...filters,
+        ...filters
       },
     });
     return response;
@@ -184,29 +184,6 @@ export const fetchGamesByCategory = async (category, page = 1, pageSize = 10) =>
   }
 };
 
-// 搜索游戏
-export const searchGames = async (keyword, page = 1, pageSize = 10) => {
-  try {
-    const response = await apiClient.get('/games/search', {
-      params: {
-        keyword,
-        page,
-        pageSize,
-      },
-    });
-    return response;
-  } catch (error) {
-    // 返回模拟数据
-    console.log('使用模拟搜索结果');
-    return {
-      data: {
-        items: [],
-        currentPage: page,
-        pageSize,
-        total: 0,
-      },
-    };
-  }
-};
+// 搜索游戏函数已移除，暂未使用
 
 export default apiClient;

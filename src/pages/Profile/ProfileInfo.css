@@ -9,30 +9,8 @@
   padding: 20px;
 }
 
-.user-basic-info {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.view-avatar {
-  background: #1890ff;
-}
-
 .user-details {
   flex: 1;
-}
-
-.username {
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-}
-
-.email {
-  margin: 0 0 12px 0;
-  color: #666;
 }
 
 .bio {
@@ -67,40 +45,11 @@
   margin-top: 24px;
 }
 
-/* 额外信息样式 */
-.additional-info {
-  margin: 16px 0;
-  padding: 16px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
-}
-
-.additional-info p {
-  margin: 8px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.additional-info a {
-  color: #1890ff;
-  text-decoration: none;
-}
-
-.additional-info a:hover {
-  text-decoration: underline;
-}
+/* 额外信息样式已移除 */
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .form-actions {
     text-align: center;
-  }
-  
-  .additional-info {
-    padding: 12px;
-  }
-  
-  .additional-info p {
-    font-size: 13px;
   }
 }

@@ -44,55 +44,6 @@ export const removeItem = (key) => {
   }
 };
 
-/**
- * 清除所有localStorage数据
- */
-export const clearAll = () => {
-  try {
-    localStorage.clear();
-  } catch (error) {
-    console.error('Error clearing localStorage:', error);
-  }
-};
-
-/**
- * 检查localStorage是否可用
- * @returns {boolean} localStorage是否可用
- */
-export const isLocalStorageAvailable = () => {
-  try {
-    const testKey = '__localStorage_test__';
-    setItem(testKey, testKey);
-    removeItem(testKey);
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
-/**
- * 获取localStorage使用情况
- * @returns {Object} 包含已用空间和总空间的对象
- */
-export const getStorageUsage = () => {
-  let used = 0;
-  for (const key in localStorage) {
-    if (localStorage.hasOwnProperty(key)) {
-      used += localStorage.getItem(key).length + key.length;
-    }
-  }
-  // 转换为KB
-  const usedKB = Math.round(used / 1024);
-  // localStorage通常限制为5MB
-  const totalKB = 5 * 1024;
-  
-  return {
-    used: usedKB,
-    total: totalKB,
-    percent: Math.round((usedKB / totalKB) * 100),
-  };
-};
-
 // 存储键名常量
 export const STORAGE_KEYS = {
   USER_INFO: 'userInfo',

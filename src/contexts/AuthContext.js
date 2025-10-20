@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { login as apiLogin, logout as apiLogout } from '../apis/userAPI';
+import { getItem, setItem, removeItem, STORAGE_KEYS } from '../utils/storage';
 
 // 创建认证上下文
 const AuthContext = createContext();
@@ -8,40 +10,64 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 初始化时检查本地存储中的用户信息
+  // 初始化时从localStorage获取用户信息
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const initAuth = async () => {
+      try {
+        // 检查是否有存储的token和用户信息
+        const storedToken = getItem(STORAGE_KEYS.AUTH_TOKEN);
+        const storedUser = getItem(STORAGE_KEYS.USER_INFO);
+        
+        if (storedToken && storedUser) {
+          setUser(storedUser);
+        }
+      } catch (error) {
+        console.error('初始化认证信息失败:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    initAuth();
   }, []);
 
   // 登录函数
-  const login = (userData) => {
-    // 模拟登录成功
-    const userInfo = {
-      id: 1,
-      username: userData.username,
-      avatar: null, // 初始头像为null，后续会使用默认头像
-      ...userData
-    };
-    setUser(userInfo);
-    localStorage.setItem('user', JSON.stringify(userInfo));
-    return Promise.resolve(userInfo);
+  const login = async (userData) => {
+    try {
+      // 调用API进行实际登录验证
+      const response = await apiLogin(userData.username, userData.password);
+      
+      // 更新状态
+      setUser(response.data.user);
+      
+      return response.data.user;
+    } catch (error) {
+      console.error('登录失败:', error);
+      throw error; // 抛出错误以便组件处理
+    }
   };
 
   // 登出函数
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      // 调用API登出
+      await apiLogout();
+    } catch (error) {
+      console.error('登出API调用失败:', error);
+      // 即使API调用失败，仍清理本地状态
+    } finally {
+      // 清理本地状态
+      setUser(null);
+      removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      removeItem(STORAGE_KEYS.USER_INFO);
+    }
   };
 
   // 更新用户信息（例如头像）
   const updateUser = (updates) => {
     const updatedUser = { ...user, ...updates };
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setItem(STORAGE_KEYS.USER_INFO, updatedUser);
     return updatedUser;
   };
 

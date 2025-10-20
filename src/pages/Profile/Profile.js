@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Avatar, Button, Upload, Row, Col, Layout, Menu, Divider } from 'antd';
-import { UserOutlined, StarOutlined, SettingOutlined, HomeOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, StarOutlined, HomeOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,7 +12,7 @@ const { Sider, Content } = Layout;
 const { Meta } = Card;
 
 const Profile = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const reduxUser = useSelector(state => state.user.userInfo);
   const location = useLocation();
   const dispatch = useDispatch();
@@ -26,7 +26,6 @@ const Profile = () => {
     if (path === '/profile') return 'info';
     if (path.includes('/profile/favorites')) return 'favorites';
     if (path.includes('/profile/settings')) return 'settings';
-    if (path.includes('/profile/password')) return 'password';
     return 'info';
   };
 
@@ -70,6 +69,16 @@ const Profile = () => {
   // 判断是否是基本信息首页
   const isInfoPage = location.pathname === '/profile';
 
+  // 处理登出
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // 登出后会自动重定向到登录页面，因为路由保护组件会检查用户状态
+    } catch (error) {
+      console.error('登出失败:', error);
+    }
+  };
+
   return (
     <div className="profile-container">
       <Card 
@@ -97,12 +106,10 @@ const Profile = () => {
               <Menu.Item key="favorites" icon={<StarOutlined />}>
                 <Link to="/profile/favorites">我的收藏</Link>
               </Menu.Item>
-              <Menu.Item key="settings" icon={<SettingOutlined />}>
-                  <Link to="/profile/settings">设置</Link>
-                </Menu.Item>
-                <Menu.Item key="password" icon={<LockOutlined />}>
-                  <Link to="/profile/password">修改密码</Link>
-                </Menu.Item>
+              {/* 移除了设置菜单项和修改密码菜单项 */}
+              <Menu.Item key="logout" icon={<LogoutOutlined />} danger>
+                <span onClick={handleLogout}>登出</span>
+              </Menu.Item>
             </Menu>
           </Sider>
           <Content className="profile-outlet">
@@ -134,20 +141,7 @@ const Profile = () => {
                     
                     <Divider />
                     
-                    <div className="user-stats">
-                      <div className="stat-item">
-                        <div className="stat-value">{userData.favoriteCount || 0}</div>
-                        <div className="stat-label">收藏游戏</div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-value">{userData.reviewCount || 0}</div>
-                        <div className="stat-label">评论数</div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-value">{userData.joinDate || ''}</div>
-                        <div className="stat-label">注册日期</div>
-                      </div>
-                    </div>
+                    {/* 移除了用户统计信息（收藏游戏、评论数、注册日期） */}
                   </Card>
                 </Col>
                 <Col xs={24} md={18}>

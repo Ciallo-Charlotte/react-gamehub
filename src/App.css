@@ -198,10 +198,7 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* 最新活动区域 */
-.activities-section {
-  margin-top: 32px;
-}
+/* 最新活动区域样式已移除，未被使用 */
 
 /* 页脚 */
 .footer {
@@ -284,9 +281,7 @@ body {
     font-size: 12px;
   }
   
-  .home-container {
-    padding: 16px 12px;
-  }
+  /* home-container样式已移除，未被使用 */
   
   .hero-section {
     padding: 32px 12px;

@@ -9,36 +9,59 @@ const ProfileInfo = () => {
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { userData } = useAuth();
+  const [tempAvatar, setTempAvatar] = useState(null);
+  const { user: userData, updateUser } = useAuth();
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (userData) {
       form.setFieldsValue({
         username: userData.username,
-        email: userData.email,
         bio: userData.bio || '',
-        location: userData.location || '',
-        website: userData.website || '',
-        socialMedia: userData.socialMedia || '',
       });
     }
   }, [userData, form]);
 
-  const handleUpload = async (info) => {
-    // 上传逻辑
-    console.log('Upload:', info);
-    // 这里可以添加实际的上传实现
+  const handleUpload = async (file) => {
+    // 使用FileReader将本地图片转换为Base64
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        // 将Base64图片数据保存到状态中
+        setTempAvatar(e.target.result);
+        resolve({ status: 'done', url: e.target.result });
+      };
+      reader.onerror = () => {
+        reject(new Error('读取图片失败'));
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleSave = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
+      // 处理用户名和个人简介字段
+      const { username, bio } = values;
       // 模拟API调用
       setTimeout(() => {
-        const updatedUser = { ...userData, ...values };
+        const updatedUser = { 
+          ...userData, 
+          username,
+          bio,
+          // 如果有临时头像，则更新头像
+          ...(tempAvatar && { avatar: tempAvatar })
+        };
+        // 同时更新Redux和AuthContext中的用户信息
         dispatch(setUserInfo(updatedUser));
+        updateUser({ 
+          username, 
+          bio, 
+          ...(tempAvatar && { avatar: tempAvatar }) 
+        });
+        // 清空临时头像
+        setTempAvatar(null);
         message.success('个人信息更新成功');
         setIsEditing(false);
         setLoading(false);
@@ -62,7 +85,10 @@ const ProfileInfo = () => {
               showUploadList={false}
               beforeUpload={handleUpload}
             >
-              {userData?.avatar ? (
+              {tempAvatar ? (
+                // 优先显示选择的本地临时头像
+                <Avatar size={128} src={tempAvatar} />
+              ) : userData?.avatar ? (
                 <Avatar size={128} src={userData.avatar} />
               ) : (
                 <Avatar size={128} icon={<UserOutlined />}>
@@ -81,20 +107,9 @@ const ProfileInfo = () => {
             <Form.Item
               name="username"
               label="用户名"
-              rules={[{ required: true, message: '请输入用户名' }]}
+              rules={[{ required: false, message: '请输入用户名' }]}
             >
               <Input placeholder="请输入用户名" />
-            </Form.Item>
-            
-            <Form.Item
-              name="email"
-              label="邮箱"
-              rules={[
-                { required: true, message: '请输入邮箱地址' },
-                { type: 'email', message: '请输入有效的邮箱地址' },
-              ]}
-            >
-              <Input placeholder="请输入邮箱地址" />
             </Form.Item>
             
             <Form.Item
@@ -102,33 +117,6 @@ const ProfileInfo = () => {
               label="个人简介"
             >
               <Input.TextArea rows={4} placeholder="介绍一下自己吧" />
-            </Form.Item>
-            
-            <Form.Item
-              name="location"
-              label="所在地"
-            >
-              <Input placeholder="如：北京市" />
-            </Form.Item>
-            
-            <Form.Item
-              name="website"
-              label="个人网站"
-              rules={[
-                {
-                  pattern: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([/\w \.-]*)*\/?$/, 
-                  message: '请输入有效的网站地址'
-                }
-              ]}
-            >
-              <Input placeholder="如：https://example.com" />
-            </Form.Item>
-            
-            <Form.Item
-              name="socialMedia"
-              label="社交媒体"
-            >
-              <Input placeholder="如：微博: @用户名" />
             </Form.Item>
             
             <Form.Item>
@@ -152,15 +140,6 @@ const ProfileInfo = () => {
             ) : (
               <p className="bio">暂无个人简介</p>
             )}
-            <div className="additional-info">
-              <p><strong>用户ID：</strong>{userData?.id || '未知'}</p>
-              {userData?.location && <p><strong>所在地：</strong>{userData.location}</p>}
-              {userData?.website && <p><strong>个人网站：</strong><a href={userData.website} target="_blank" rel="noopener noreferrer">{userData.website}</a></p>}
-              {userData?.socialMedia && (
-                <p><strong>社交媒体：</strong>{userData.socialMedia}</p>
-              )}
-              {userData?.joinDate && <p><strong>注册日期：</strong>{userData.joinDate}</p>}
-            </div>
             <Button type="primary" onClick={() => setIsEditing(true)}>
               <EditOutlined /> 编辑资料
             </Button>

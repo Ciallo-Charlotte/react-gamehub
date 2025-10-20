@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
+import { register } from '../../apis/userAPI';
 import './Register.css';
 
 const { Title, Text } = Typography;
@@ -14,23 +15,30 @@ function Register() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 验证密码一致性
+      // 验证密码一致性，只在点击注册时检查
       if (values.password !== values.confirmPassword) {
-        message.error('两次输入的密码不一致');
+        form.setFields([{
+          name: ['confirmPassword'],
+          errors: ['两次输入的密码不一致']
+        }]);
         return;
       }
-
-      // 模拟注册请求
-      console.log('注册请求:', values);
       
-      // 模拟网络延迟
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 准备注册数据
+      const registerData = {
+        username: values.username,
+        password: values.password
+      };
+      
+      // 调用注册API
+      const response = await register(registerData);
       
       // 注册成功
-      message.success('注册成功，请登录');
+      message.success(response.data.message || '注册成功，请登录');
       navigate('/login');
     } catch (error) {
-      message.error('注册失败，请稍后重试');
+      // 处理错误，特别是用户名重复的情况
+      message.error(error.message || '注册失败，请稍后重试');
       console.error('注册错误:', error);
     } finally {
       setLoading(false);
@@ -50,9 +58,9 @@ function Register() {
         >
           <Form.Item
             name="username"
-            label="用户名"
+            label="用户名（可选）"
             rules={[
-              { required: true, message: '请输入用户名' },
+              { required: false, message: '请输入用户名' },
               { min: 3, message: '用户名长度不能少于3个字符' },
               { max: 20, message: '用户名长度不能超过20个字符' },
               { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线' },
@@ -84,6 +92,12 @@ function Register() {
             label="确认密码"
             rules={[
               { required: true, message: '请确认密码' },
+              {
+                validator: (_, value) => {
+                  // 这个验证器在表单提交时会执行，但我们会在onFinish中手动处理
+                  return Promise.resolve();
+                }
+              }
             ]}
           >
             <Input.Password 

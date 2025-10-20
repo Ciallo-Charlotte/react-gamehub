@@ -16,15 +16,25 @@ function Login() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 使用auth context中的login方法
+      // 重置表单错误状态
+      form.setFields([{ name: ['password'], errors: [] }]);
+      
+      // 使用auth context中的login方法，它会调用userAPI进行数据库验证
       await login(values);
       
       // 登录成功
       message.success('登录成功');
       navigate('/');
     } catch (error) {
-      message.error('登录失败，请检查用户名和密码');
       console.error('登录错误:', error);
+      
+      // 在密码框下方显示错误信息
+      form.setFields([
+        {
+          name: ['password'],
+          errors: [error.message || '登录失败，请检查用户名和密码']
+        }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -45,7 +55,7 @@ function Login() {
             name="username"
             label="用户名"
             rules={[
-              { required: true, message: '请输入用户名' },
+              { required: false, message: '请输入用户名' },
               { min: 3, message: '用户名长度不能少于3个字符' },
             ]}
           >

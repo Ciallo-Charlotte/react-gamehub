@@ -358,7 +358,7 @@ const ReviewsPage = () => {
         </div>
       ) : (
         <>
-          <Row gutter={[24, 24]} className="reviews-grid">
+          <Row gutter={[24, 24]}>
             {currentReviews.map((review) => (
               <Col xs={24} sm={12} lg={8} key={review.id}>
                 <Card
@@ -430,7 +430,7 @@ const ReviewsPage = () => {
           </Row>
 
           <div className="pagination-container">
-            <Button.Group className="pagination-group">
+            <Space className="pagination-group">
               <Button 
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1, pageSize)}
@@ -443,7 +443,7 @@ const ReviewsPage = () => {
               >
                 下一页
               </Button>
-            </Button.Group>
+            </Space>
             <div className="page-info">
               第 {currentPage} 页，共 {Math.ceil(reviewData.length / pageSize)} 页
             </div>
@@ -455,7 +455,7 @@ const ReviewsPage = () => {
       <Modal
         title={null}
         centered
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
         width={800}

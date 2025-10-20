@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Typography, List, Empty, Button, Row, Col, message } from 'antd';
 import { LockOutlined, StarOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
+import './ProfileFavorites.css';
 
 const { Title, Text } = Typography;
 
