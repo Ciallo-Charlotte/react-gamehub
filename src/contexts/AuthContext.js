@@ -1,95 +1,185 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, logout as apiLogout } from '../apis/userAPI';
-import { getItem, setItem, removeItem, STORAGE_KEYS } from '../utils/storage';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useDispatch } from 'react-redux';
+import { setCurrentUser, clearUser } from '../store/modules/userSlice';
+import { userAPI } from '../apis/userAPI';
 
 // 创建认证上下文
 const AuthContext = createContext();
 
+
+
 // 认证提供者组件
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
 
-  // 初始化时从localStorage获取用户信息
+  // 从localStorage加载用户信息
   useEffect(() => {
-    const initAuth = async () => {
+    const loadUser = () => {
       try {
-        // 检查是否有存储的token和用户信息
-        const storedToken = getItem(STORAGE_KEYS.AUTH_TOKEN);
-        const storedUser = getItem(STORAGE_KEYS.USER_INFO);
+        // 同时检查token和userInfo，确保验证有效
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('userInfo');
         
-        if (storedToken && storedUser) {
-          setUser(storedUser);
+        if (token && userData) {
+          const parsedUser = JSON.parse(userData);
+          console.log('从localStorage加载用户信息:', parsedUser);
+          setUser(parsedUser);
+          // 同时更新Redux store
+          dispatch(setCurrentUser(parsedUser));
         }
       } catch (error) {
-        console.error('初始化认证信息失败:', error);
+        console.error('加载用户信息失败:', error.message || error);
+        // 出错时清理可能损坏的数据
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
       } finally {
         setIsLoading(false);
       }
     };
+
+    // 立即执行加载
+    loadUser();
     
-    initAuth();
-  }, []);
+    // 监听localStorage变化，以便在其他标签页登录/登出时同步状态
+    const handleStorageChange = (e) => {
+      if (e.key === 'userInfo' || e.key === 'token') {
+        loadUser();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [dispatch]);
 
-  // 登录函数
-  const login = async (userData) => {
+  // 登录函数 - 使用userAPI
+  const login = async (credentials) => {
+    setIsLoading(true);
     try {
-      // 调用API进行实际登录验证
-      const response = await apiLogin(userData.username, userData.password);
+      const { username, password } = credentials;
       
-      // 更新状态
-      setUser(response.data.user);
+      // 调用userAPI进行登录，userAPI.login直接返回用户对象
+      const userData = await userAPI.login(username, password);
       
-      return response.data.user;
+      if (!userData) {
+        throw new Error('登录失败，未返回用户数据');
+      }
+      
+      console.log('登录成功，用户数据:', userData);
+      
+      // 登录成功，更新状态
+      setUser(userData);
+      // 更新Redux store中的用户信息
+      dispatch(setCurrentUser(userData));
+      
+      return { success: true, user: userData };
     } catch (error) {
-      console.error('登录失败:', error);
-      throw error; // 抛出错误以便组件处理
-    }
-  };
-
-  // 登出函数
-  const logout = async () => {
-    try {
-      // 调用API登出
-      await apiLogout();
-    } catch (error) {
-      console.error('登出API调用失败:', error);
-      // 即使API调用失败，仍清理本地状态
+      console.error('登录失败:', error.message || error);
+      throw error;
     } finally {
-      // 清理本地状态
-      setUser(null);
-      removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      removeItem(STORAGE_KEYS.USER_INFO);
+      setIsLoading(false);
     }
   };
 
-  // 更新用户信息（例如头像）
-  const updateUser = (updates) => {
-    const updatedUser = { ...user, ...updates };
-    setUser(updatedUser);
-    setItem(STORAGE_KEYS.USER_INFO, updatedUser);
-    return updatedUser;
+  // 登出函数 - 使用userAPI
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      // 调用userAPI进行登出
+      await userAPI.logout();
+      
+      // 清除本地状态
+      setUser(null);
+      
+      // 清除Redux中的用户状态
+      dispatch(clearUser());
+      
+      // 确保清除localStorage中的所有用户相关数据
+      console.log('清除localStorage中的用户数据');
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('token');
+      
+      return { success: true };
+    } catch (error) {
+      console.error('登出失败:', error.message || error);
+      
+      // 即使API调用失败，也要清理本地状态
+      setUser(null);
+      dispatch(clearUser());
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('token');
+      
+      return { success: false, error: error.message || error };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // 注册函数 - 使用userAPI
+  const register = async (userData) => {
+    setIsLoading(true);
+    try {
+      // 调用userAPI进行注册
+      const result = await userAPI.register(userData);
+      
+      // 检查结果是否包含用户信息
+      if (result && result.user) {
+        console.log('注册成功，用户信息:', result.user);
+        // 更新用户状态
+        setUser(result.user);
+      }
+      
+      // 返回成功状态和结果数据
+      return { success: true, ...result };
+    } catch (error) {
+      console.error('注册失败:', error.message || error);
+      // 确保抛出具体的错误信息
+      throw new Error(typeof error === 'string' ? error : error.message || '注册失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 更新用户信息
+  const updateUser = async (updates) => {
+    setIsLoading(true);
+    try {
+      const updatedUser = { ...user, ...updates };
+      setUser(updatedUser);
+      // 更新本地存储
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
+      // 更新Redux store
+      dispatch(setCurrentUser(updatedUser));
+      return updatedUser;
+    } catch (error) {
+      console.error('更新用户信息失败:', error.message || error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 提供给子组件的值
   const value = {
     user,
     isLoading,
-    isAuthenticated: !!user,
     login,
     logout,
-    updateUser
+    register,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
 // 自定义Hook，方便在组件中使用认证上下文
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth必须在AuthProvider内部使用');
   }
   return context;
-}
+};
 
 export default AuthContext;

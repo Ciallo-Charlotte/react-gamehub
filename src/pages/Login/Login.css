@@ -25,6 +25,7 @@
 
 .login-form {
   width: 100%;
+  margin: 0 auto;
 }
 
 .site-form-item-icon {
@@ -33,6 +34,7 @@
 
 .login-form-actions {
   margin-top: 20px;
+  margin-right: 25px;
 }
 
 .login-button {

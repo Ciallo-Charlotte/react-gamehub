@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../../apis/userAPI';
+import { useAuth } from '../../contexts/AuthContext';
 import './Register.css';
 
 const { Title, Text } = Typography;
@@ -11,6 +11,7 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const { register } = useAuth();
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -30,16 +31,17 @@ function Register() {
         password: values.password
       };
       
-      // 调用注册API
-      const response = await register(registerData);
+      // 调用AuthContext中的register函数
+      await register(registerData);
       
       // 注册成功
-      message.success(response.data.message || '注册成功，请登录');
+      message.success('注册成功，请登录');
       navigate('/login');
     } catch (error) {
-      // 处理错误，特别是用户名重复的情况
-      message.error(error.message || '注册失败，请稍后重试');
+      // 处理错误，简化逻辑
       console.error('注册错误:', error);
+      // 在确认密码文本框下方显示"用户名已存在"
+      form.setFields([{ name: ['confirmPassword'], errors: ['用户名已存在'] }]);
     } finally {
       setLoading(false);
     }
@@ -58,9 +60,9 @@ function Register() {
         >
           <Form.Item
             name="username"
-            label="用户名（可选）"
+            label="用户名"
             rules={[
-              { required: false, message: '请输入用户名' },
+              { required: true, message: '请输入用户名' },
               { min: 3, message: '用户名长度不能少于3个字符' },
               { max: 20, message: '用户名长度不能超过20个字符' },
               { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线' },

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Typography, List, Empty, Button, Row, Col, message } from 'antd';
-import { LockOutlined, StarOutlined, DeleteOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Card, Typography, Empty, Button, Row, Col, message } from 'antd';
+import { StarOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import './ProfileFavorites.css';
 
@@ -11,7 +11,7 @@ const mockFavoriteGames = [
   {
     id: 1,
     title: '赛博朋克 2077',
-    cover: 'https://via.placeholder.com/200x300',
+    cover: 'https://cdn.max-c.com/heybox/game/header/1091500_3olJW.jpg',
     rating: 8.7,
     genre: 'RPG',
     releaseDate: '2020-12-10',
@@ -19,7 +19,7 @@ const mockFavoriteGames = [
   {
     id: 2,
     title: '艾尔登法环',
-    cover: 'https://via.placeholder.com/200x300',
+    cover: 'https://heyboxbj.max-c.com/gameimg/steam_item_assets/6026263faf7142fbf97ddb6948dbf05a.jpg',
     rating: 9.6,
     genre: 'ARPG',
     releaseDate: '2022-02-25',
@@ -27,7 +27,7 @@ const mockFavoriteGames = [
   {
     id: 3,
     title: '原神',
-    cover: 'https://via.placeholder.com/200x300',
+    cover: 'https://cdn.max-c.com/mobile/app/head/62bfe2f3513442afb4425e5c47624b6c.jpg?imageMogr2/format/webp/quality/50/auto-orient/ignore-error/1',
     rating: 8.2,
     genre: '动作冒险',
     releaseDate: '2020-09-28',
@@ -35,7 +35,7 @@ const mockFavoriteGames = [
   {
     id: 4,
     title: '最终幻想16',
-    cover: 'https://via.placeholder.com/200x300',
+    cover: 'https://heyboxbj.max-c.com/gameimg/steam_item_assets/3144dd583dc7b8ee9bb1cc6064458163.jpg',
     rating: 8.8,
     genre: 'ARPG',
     releaseDate: '2023-06-22',
@@ -45,33 +45,9 @@ const mockFavoriteGames = [
 function ProfileFavorites() {
   const [favorites, setFavorites] = useState(mockFavoriteGames);
   const [loading, setLoading] = useState(false);
-  const [privacyVisible, setPrivacyVisible] = useState(
-    localStorage.getItem('privacyVisible') !== 'false' // 默认公开
-  );
   const { user } = useAuth();
 
-  // 监听localStorage变化
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const updatedVisibility = localStorage.getItem('privacyVisible') !== 'false';
-      setPrivacyVisible(updatedVisibility);
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // 在实际应用中，这里会从API获取用户收藏的游戏
-  useEffect(() => {
-    // 模拟API调用获取收藏列表
-    if (user) {
-      // 实际项目中应调用API
-      // fetchFavorites(user.id).then(data => setFavorites(data));
-    }
-  }, [user]);
-
   const handleRemoveFavorite = (gameId) => {
-    // 模拟移除收藏
     setLoading(true);
     setTimeout(() => {
       setFavorites(favorites.filter(game => game.id !== gameId));
@@ -81,11 +57,7 @@ function ProfileFavorites() {
   };
 
   // 切换隐私设置
-  const togglePrivacy = () => {
-    const newVisibility = !privacyVisible;
-    setPrivacyVisible(newVisibility);
-    localStorage.setItem('privacyVisible', newVisibility);
-  };
+  // 移除隐私设置功能，收藏内容始终可见
 
   return (
     <div className="profile-favorites">
@@ -93,37 +65,9 @@ function ProfileFavorites() {
       
       <Card 
         className="profile-favorites-card"
-        title={
-          <div className="card-title-with-privacy">
-            <span>收藏游戏</span>
-            {!privacyVisible && (
-              <Text type="secondary" style={{ marginLeft: 8 }}>
-                (私密)
-              </Text>
-            )}
-          </div>
-        }
+        title="收藏游戏"
       >
-        {!privacyVisible ? (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '40px 20px',
-            backgroundColor: 'rgba(24, 144, 255, 0.05)',
-            borderRadius: '8px',
-            border: '1px dashed #1890ff'
-          }}>
-            <LockOutlined style={{ fontSize: '48px', color: '#1890ff', marginBottom: '16px' }} />
-            <Title level={4} style={{ marginBottom: '8px' }}>游戏库已设为私密</Title>
-            <p style={{ color: '#666' }}>您的游戏收藏目前不对其他用户可见</p>
-            <Button 
-              type="primary" 
-              style={{ marginTop: '16px' }}
-              onClick={togglePrivacy}
-            >
-              立即公开
-            </Button>
-          </div>
-        ) : favorites.length === 0 ? (
+        {favorites.length === 0 ? (
           <Empty description="暂无收藏的游戏" />
         ) : (
           <Row gutter={[16, 16]}>

@@ -24,7 +24,18 @@ function Login() {
       
       // 登录成功
       message.success('登录成功');
-      navigate('/');
+      
+      // 检查是否有需要返回的URL
+      const returnUrl = sessionStorage.getItem('returnUrl');
+      if (returnUrl) {
+        // 清除保存的URL
+        sessionStorage.removeItem('returnUrl');
+        // 返回到之前的页面
+        navigate(returnUrl);
+      } else {
+        // 默认导航到首页
+        navigate('/');
+      }
     } catch (error) {
       console.error('登录错误:', error);
       
@@ -35,6 +46,7 @@ function Login() {
           errors: [error.message || '登录失败，请检查用户名和密码']
         }
       ]);
+      message.error(error.message || '登录失败');
     } finally {
       setLoading(false);
     }
@@ -55,7 +67,7 @@ function Login() {
             name="username"
             label="用户名"
             rules={[
-              { required: false, message: '请输入用户名' },
+              { required: true, message: '请输入用户名' },
               { min: 3, message: '用户名长度不能少于3个字符' },
             ]}
           >

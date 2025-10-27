@@ -3,7 +3,7 @@ import { Card, Avatar, Button, Form, Input, message, Upload } from 'antd';
 import { UserOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDispatch } from 'react-redux';
-import { setUserInfo } from '../../store/modules/userSlice';
+import { setCurrentUser } from '../../store/modules/userSlice';
 import './ProfileInfo.css';
 const ProfileInfo = () => {
   const [form] = Form.useForm();
@@ -54,7 +54,7 @@ const ProfileInfo = () => {
           ...(tempAvatar && { avatar: tempAvatar })
         };
         // 同时更新Redux和AuthContext中的用户信息
-        dispatch(setUserInfo(updatedUser));
+        dispatch(setCurrentUser(updatedUser));
         updateUser({ 
           username, 
           bio, 

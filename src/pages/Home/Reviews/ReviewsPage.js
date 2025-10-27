@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Spin, Tag, Avatar, Rate, Button, Modal, Badge, Space, Typography, Input } from 'antd';
-import { StarOutlined, StarFilled, EyeOutlined, MessageOutlined, CalendarOutlined, LikeOutlined } from '@ant-design/icons';
+import { EyeOutlined, MessageOutlined, CalendarOutlined, LikeOutlined } from '@ant-design/icons';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { selectIsAuthenticated, selectCurrentUser } from '../../../store/modules/userSlice';
 import './ReviewsPage.css';
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -25,7 +28,7 @@ const mockReviewData = [
     id: 1,
     title: '《博德之门3》：CRPG的新标杆',
     summary: '《博德之门3》是拉瑞安工作室的最新力作，这款游戏不仅完美继承了经典CRPG的深度和复杂性，还在现代游戏设计方面做出了杰出的创新。游戏的剧情分支非常丰富，玩家的每个选择都会对游戏世界产生深远的影响。',
-    cover: 'https://picsum.photos/id/237/800/450',
+    cover: 'https://heyboxbj.max-c.com/gameimg/steam_item_assets/905e66c53eccfe56a5ab94d094aa9d32.jpg',
     date: '2024-01-15',
     views: 89012,
     likes: 7890,
@@ -67,7 +70,7 @@ const mockReviewData = [
     id: 2,
     title: '《塞尔达传说：王国之泪》：开放世界的新高度',
     summary: '任天堂的《塞尔达传说：王国之泪》为开放世界游戏设定了新的标准。游戏的物理引擎和构建系统允许玩家创造出令人难以置信的装置和解决方案，真正实现了"创意无极限"的理念。',
-    cover: 'https://picsum.photos/id/239/800/450',
+    cover: 'https://imgheybox1.max-c.com/oa/2023/05/26/15b5417f8b32eedcc7ea2798fb937200.jpeg',
     date: '2024-01-14',
     views: 76543,
     likes: 6543,
@@ -103,7 +106,7 @@ const mockReviewData = [
     id: 3,
     title: '《赛博朋克2077》：从失败到救赎的典范',
     summary: '经历了灾难性的发售之后，CD Projekt Red通过不断的更新和DLC将《赛博朋克2077》转变为一款真正优秀的游戏。最新的DLC《自由幻局》为夜之城带来了新的故事和玩法，让这款游戏终于实现了它的潜力。',
-    cover: 'https://picsum.photos/id/240/800/450',
+    cover: 'https://cdn.max-c.com/heybox/game/header/1091500_3olJW.jpg',
     date: '2024-01-13',
     views: 65432,
     likes: 5432,
@@ -125,7 +128,7 @@ const mockReviewData = [
         author: '夜之城居民小马',
         avatar: 'https://picsum.photos/id/9/32/32',
         datetime: '2024-01-13 10:45',
-        content: '作为首发玩家，我亲眼见证了这款游戏的成长。现在的体验确实比发售时好了很多，值得重新体验。'
+        content: '作为首发玩家，我亲眼观看了这款游戏的成长。现在的体验确实比发售时好了很多，值得重新体验。'
       },
       {
         author: '剧情党小王',
@@ -139,7 +142,7 @@ const mockReviewData = [
     id: 4,
     title: '《星空》：B社的太空冒险',
     summary: 'Bethesda的《星空》是一款充满野心的太空RPG，游戏提供了数百个星球供玩家探索，每个星球都有自己独特的生态系统和资源。虽然游戏在某些方面表现出色，但也存在一些令人失望的地方。',
-    cover: 'https://picsum.photos/id/241/800/450',
+    cover: 'https://heyboxbj.max-c.com/gameimg/steam_item_assets/4017fcc6bd0721d0037f2e89a3fe1505.jpg',
     date: '2024-01-12',
     views: 54321,
     likes: 4321,
@@ -153,7 +156,7 @@ const mockReviewData = [
     },
     reviewContent: `《星空》是一款让人既兴奋又有些失望的游戏。从好的方面来说，游戏的太空探索概念非常吸引人，能够在数百个星球之间自由穿梭确实让人感觉很过瘾。角色定制系统非常细致，技能树也提供了多样化的玩法选择。
 
-然而，游戏也存在一些明显的问题。虽然有数百个星球，但很多星球都显得过于相似和空旷，探索一段时间后就会感到无聊。任务设计也比较传统，缺乏创新。此外，游戏的性能优化也不够理想，即使在高性能PC上也会出现帧率波动。
+然而，游戏也存在一些明显的问题。虽然有数百个星球，但很多星球都显得过于相似和空旷，探索一段时间后就会感到无聊。任务设计也很传统，缺乏创新。此外，游戏的性能优化也不够理想，即使在高性能PC上也会出现帧率波动。
 
 总的来说，《星空》是一款有潜力但未能完全实现的游戏。如果你是B社游戏的粉丝，或者对太空探索题材特别感兴趣，那么这款游戏仍然值得一玩。但如果你期望它能像《上古卷轴5》或《辐射4》那样成为经典，可能会感到失望。`,
     commentList: [
@@ -175,7 +178,7 @@ const mockReviewData = [
     id: 5,
     title: '《莱莎的炼金工房3》：炼金RPG的巅峰之作',
     summary: '光荣特库摩的《莱莎的炼金工房3》为炼金RPG设定了新的标准。游戏不仅改进了前作的炼金系统，还增加了新的探索和战斗要素，让整个游戏体验更加流畅和有趣。',
-    cover: 'https://picsum.photos/id/242/800/450',
+    cover: 'https://heyboxbj.max-c.com/gameimg/steam_item_assets/40c1a58dff76ec6002b488d437729e41.jpg?imageMogr2/format/webp/quality/50/auto-orient/ignore-error/1',
     date: '2024-01-11',
     views: 43210,
     likes: 3210,
@@ -191,7 +194,7 @@ const mockReviewData = [
 
 游戏的战斗系统也有了明显的改进，更加注重动作性和策略性的结合。角色的成长系统非常丰富，玩家可以根据自己的喜好培养不同风格的角色。
 
-剧情方面，虽然仍然保持了系列一贯的轻松愉快风格，但角色之间的情感描写更加细腻，特别是莱莎和她的朋友们之间的友谊让人印象深刻。画面表现也非常出色，角色设计可爱动人，场景描绘精美细腻。
+剧情方面，虽然仍然保持了系列一贯的轻松愉快风格，但角色之间的情感描写更加细腻，特别是莱莎和她的朋友们之间的友谊让人印象深刻。画面表现也很出色，角色设计可爱动人，场景描绘精美细腻。
 
 总的来说，《莱莎的炼金工房3》是一款非常出色的炼金RPG，无论是新玩家还是老粉丝都能从中获得乐趣。如果你喜欢轻松愉快的RPG游戏，那么这款游戏绝对值得一试。`,
     commentList: [
@@ -213,7 +216,7 @@ const mockReviewData = [
     id: 6,
     title: '《原神》4.4版本评测：璃月海灯节活动再创新高',
     summary: '米哈游的《原神》4.4版本带来了备受期待的璃月海灯节活动，同时也引入了新的角色和地图区域。这个版本不仅在内容上丰富了游戏，还在玩法上做出了一些有趣的创新。',
-    cover: 'https://picsum.photos/id/243/800/450',
+    cover: 'https://cdn.max-c.com/mobile/app/head/62bfe2f3513442afb4425e5c47624b6c.jpg?imageMogr2/format/webp/quality/50/auto-orient/ignore-error/1',
     date: '2024-01-10',
     views: 98765,
     likes: 8765,
@@ -225,9 +228,9 @@ const mockReviewData = [
       name: '原神攻略作者小林',
       avatar: 'https://picsum.photos/id/17/32/32'
     },
-    reviewContent: `《原神》4.4版本的璃月海灯节活动无疑是游戏迄今为止最精彩的节日活动之一。活动内容非常丰富，包括解谜、战斗和探索等多种元素。特别是新增的「纸映戏」玩法非常有创意，将传统的皮影戏艺术与游戏玩法相结合，给玩家带来了全新的体验。
+    reviewContent: `《原神》4.4版本的璃月海灯节活动绝对是游戏迄今为止最精彩的节日活动之一。活动内容非常丰富，包括解谜、战斗和探索等多种元素。特别是新增的「纸映戏」玩法非常有创意，将传统的皮影戏艺术与游戏玩法相结合，给玩家带来了全新的体验。
 
-新版本引入的新角色表现也非常出色，不仅设计精美，技能机制也很有特色，为游戏的战斗系统增添了新的可能性。新增的地图区域虽然不大，但设计非常用心，每个角落都充满了细节和惊喜。
+新版本引入的新角色表现也很出色，不仅设计精美，技能机制也很有特色，为游戏的战斗系统增添了新的可能性。新增的地图区域虽然不大，但设计非常用心，每个角落都充满了细节和惊喜。
 
 此外，米哈游在这个版本中也对游戏的一些系统进行了优化，包括界面改进和性能优化等。这些优化虽然不如新内容那么引人注目，但确实提升了整体的游戏体验。
 
@@ -257,6 +260,13 @@ const ReviewsPage = () => {
   const [selectedReview, setSelectedReview] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [commentText, setCommentText] = useState('');
+  
+  // 导航功能
+  const navigate = useNavigate();
+  
+  // 从Redux store获取认证状态和用户信息
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
     // 模拟API请求
@@ -304,12 +314,20 @@ const ReviewsPage = () => {
 
   // 发布评论
   const handlePublishComment = () => {
+    // 检查用户是否已登录，如果未登录则跳转到登录页面
+    if (!isAuthenticated) {
+      // 保存当前页面路径，以便登录后返回
+      sessionStorage.setItem('returnUrl', window.location.pathname);
+      navigate('/login');
+      return;
+    }
+    
     if (!commentText.trim() || !selectedReview) return;
     
     // 创建新评论
     const newComment = {
-      author: '当前用户', // 实际项目中应该从用户认证系统获取
-      avatar: 'https://picsum.photos/id/20/32/32', // 实际项目中应该从用户认证系统获取
+      author: currentUser?.username || currentUser?.name || '用户', // 从认证系统获取用户名
+      avatar: currentUser?.avatar || 'https://picsum.photos/id/20/32/32', // 从认证系统获取头像
       datetime: new Date().toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -366,7 +384,7 @@ const ReviewsPage = () => {
                   cover={
                     <div className="review-cover-container">
                       <div className="no-image-placeholder">
-                        {review.title}
+                        <img src={review.cover} alt={review.title} />
                       </div>
                       <Tag color="gold" className="review-category">
                         {review.category}
@@ -464,7 +482,7 @@ const ReviewsPage = () => {
         {selectedReview && (
           <div className="review-detail">
             <div className="detail-cover-placeholder">
-              {selectedReview.title}
+              <img src={selectedReview.cover} alt={selectedReview.title} />
             </div>
             <Title level={2} className="detail-title">
               {selectedReview.title}

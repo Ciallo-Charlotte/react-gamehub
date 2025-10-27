@@ -1,15 +1,13 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import App from '../App';
+import { Provider, useSelector } from 'react-redux';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
 import Profile from '../pages/Profile/Profile';
 import ProfileInfo from '../pages/Profile/ProfileInfo';
 import ProfileFavorites from '../pages/Profile/ProfileFavorites';
-// 移除了ProfileSettings的导入
-// 移除了ProfilePassword的导入
 import HomeLayout from '../pages/Home/Layout/HomeLayout';
+import HomePage from '../pages/Home/HomePage/HomePage';
 import NewsPage from '../pages/Home/News/NewsPage';
 import DiscussionsPage from '../pages/Home/Discussions/DiscussionsPage';
 import ReviewsPage from '../pages/Home/Reviews/ReviewsPage';
@@ -19,14 +17,18 @@ import store from '../store';
 // 路由保护组件
 const PrivateRoute = ({ children }) => {
   const { user, isLoading } = useAuth();
+  const reduxUser = useSelector(state => state.user.userInfo);
   
   // 如果正在加载中，可以显示加载状态
   if (isLoading) {
     return <div>Loading...</div>;
   }
   
+  // 检查是否已登录（同时检查AuthContext和Redux store）
+  const isAuthenticated = !!user || !!reduxUser;
+  
   // 如果未登录，重定向到登录页面
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
@@ -37,12 +39,12 @@ const PrivateRoute = ({ children }) => {
 // 创建路由配置
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <App />,
-  },
-  {
     element: <HomeLayout />,
     children: [
+      {
+          path: '/',
+          element: <HomePage />,
+        },
       {
         path: 'news',
         element: <NewsPage />,
@@ -89,8 +91,6 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      // 移除了设置页面路由配置
-      // 移除了修改密码页面路由配置
     ],
   },
 ]);

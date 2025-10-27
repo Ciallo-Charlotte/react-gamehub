@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Input, Avatar, Button, Space, Tag, Badge, Spin, Empty, Modal, Form } from 'antd';
-import { SearchOutlined, MessageOutlined, EyeOutlined, HeartOutlined, StarOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
+import {  MessageOutlined, EyeOutlined, HeartOutlined, MoreOutlined } from '@ant-design/icons';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { selectIsAuthenticated, selectCurrentUser } from '../../../store/modules/userSlice';
 import './DiscussionsPage.css';
 
 const { Search, TextArea } = Input;
@@ -148,6 +151,13 @@ const DiscussionsPage = () => {
   const [newDiscussionTitle, setNewDiscussionTitle] = useState('');
   const [newDiscussionContent, setNewDiscussionContent] = useState('');
   const [newDiscussionTags, setNewDiscussionTags] = useState('');
+  
+  // 导航功能
+  const navigate = useNavigate();
+  
+  // 从Redux store获取认证状态和用户信息
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
     // 模拟API请求
@@ -189,6 +199,13 @@ const DiscussionsPage = () => {
 
   // 打开发布讨论模态框
   const showCreateModal = () => {
+    // 检查用户是否已登录，如果未登录则跳转到登录页面
+    if (!isAuthenticated) {
+      // 保存当前页面路径，以便登录后返回
+      sessionStorage.setItem('returnUrl', window.location.pathname);
+      navigate('/login');
+      return;
+    }
     setIsModalVisible(true);
   };
 
@@ -221,8 +238,8 @@ const DiscussionsPage = () => {
       title: newDiscussionTitle.trim(),
       content: newDiscussionContent.trim(),
       author: {
-        name: '当前用户', // 实际项目中应该从用户认证系统获取
-        avatar: 'https://picsum.photos/id/30/32/32' // 实际项目中应该从用户认证系统获取
+        name: currentUser?.username || currentUser?.name || '用户', // 从认证系统获取用户名
+        avatar: currentUser?.avatar || 'https://picsum.photos/id/30/32/32' // 从认证系统获取头像
       },
       date: new Date().toISOString(),
       views: 0,
@@ -359,8 +376,8 @@ const DiscussionsPage = () => {
           className="discussions-search"
         />
         <Button type="primary" size="large" className="create-post-btn" onClick={showCreateModal}>
-          发布讨论
-        </Button>
+           发布讨论
+          </Button>
       </div>
 
       {loading ? (

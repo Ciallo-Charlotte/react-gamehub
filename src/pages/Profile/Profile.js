@@ -1,21 +1,21 @@
 import React from 'react';
-import { Card, Avatar, Button, Upload, Row, Col, Layout, Menu, Divider } from 'antd';
+import { Card, Avatar, Button, Row, Col, Layout, Menu, Divider } from 'antd';
 import { UserOutlined, StarOutlined, HomeOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateUserInfo } from '../../apis/userAPI';
-import { setUserInfo } from '../../store/modules/userSlice';
+import { useSelector } from 'react-redux';
 import './Profile.css';
 
 const { Sider, Content } = Layout;
-const { Meta } = Card;
+
 
 const Profile = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const reduxUser = useSelector(state => state.user.userInfo);
   const location = useLocation();
-  const dispatch = useDispatch();
+  
+  // 计算认证状态
+  const isAuthenticated = !!user || !!reduxUser;
   
   // 使用AuthContext和Redux中的用户信息
   const userData = reduxUser || user;
@@ -25,22 +25,33 @@ const Profile = () => {
     const path = location.pathname;
     if (path === '/profile') return 'info';
     if (path.includes('/profile/favorites')) return 'favorites';
-    if (path.includes('/profile/settings')) return 'settings';
     return 'info';
   };
 
-  // 处理头像上传
-  const handleAvatarUpload = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-      const response = await updateUserInfo({ avatar: formData });
-      dispatch(setUserInfo(response.data));
-      return false; // 阻止默认上传行为
-    } catch (error) {
-      return Upload.LIST_IGNORE;
-    }
-  };
+
+
+  // 加载状态处理
+  if (isLoading) {
+    return (
+      <div className="profile-container">
+        <Card 
+          title={
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>个人中心</span>
+              <Link to="/">
+                <Button type="link" icon={<HomeOutlined />}>返回首页</Button>
+              </Link>
+            </div>
+          } 
+          className="profile-card"
+        >
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <p>加载中...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   // 如果未登录，显示登录提示
   if (!isAuthenticated || !userData) {
@@ -106,7 +117,6 @@ const Profile = () => {
               <Menu.Item key="favorites" icon={<StarOutlined />}>
                 <Link to="/profile/favorites">我的收藏</Link>
               </Menu.Item>
-              {/* 移除了设置菜单项和修改密码菜单项 */}
               <Menu.Item key="logout" icon={<LogoutOutlined />} danger>
                 <span onClick={handleLogout}>登出</span>
               </Menu.Item>
@@ -118,30 +128,22 @@ const Profile = () => {
                 <Col xs={24} md={6}>
                   <Card className="profile-card profile-sidebar">
                     <div className="avatar-section">
-                      <Upload
-                        beforeUpload={handleAvatarUpload}
-                        showUploadList={false}
-                        className="avatar-upload"
+                      <Avatar
+                        size={128}
+                        src={userData.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
+                        className="profile-avatar"
                       >
-                        <Avatar
-                          size={128}
-                          src={userData.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
-                          className="profile-avatar"
-                        >
-                          <UserOutlined />
-                        </Avatar>
-                        <div className="avatar-upload-text">更换头像</div>
-                      </Upload>
+                        <UserOutlined />
+                      </Avatar>
                     </div>
                     
-                    <div className="user-info">
+                    <div className="user-info" style={{ textAlign: 'center' }}>
                       <h2 className="username">{userData.nickname || userData.username}</h2>
                       <p className="user-email">{userData.email}</p>
                     </div>
                     
                     <Divider />
                     
-                    {/* 移除了用户统计信息（收藏游戏、评论数、注册日期） */}
                   </Card>
                 </Col>
                 <Col xs={24} md={18}>
