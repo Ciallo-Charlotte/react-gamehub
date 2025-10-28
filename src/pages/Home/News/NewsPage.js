@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Row, Col, Typography, Avatar, Badge, Tag, Pagination, Spin } from 'antd';
 import { EyeOutlined, MessageOutlined, CalendarOutlined } from '@ant-design/icons';
 import './NewsPage.css';
@@ -112,9 +113,12 @@ const mockNewsData = [
       avatar: 'https://picsum.photos/id/8/32/32'
     }
   }
-];
+  ];
+
+export { mockNewsData };
 
 const NewsPage = () => {
+  const navigate = useNavigate();
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -186,6 +190,7 @@ const NewsPage = () => {
                     </div>
                   }
                   className="news-card"
+                  onClick={() => navigate(`/news/${news.id}`)}
                 >
                   <Title level={4} className="news-title">
                     {news.title}

@@ -9,6 +9,7 @@ import ProfileFavorites from '../pages/Profile/ProfileFavorites';
 import HomeLayout from '../pages/Home/Layout/HomeLayout';
 import HomePage from '../pages/Home/HomePage/HomePage';
 import NewsPage from '../pages/Home/News/NewsPage';
+import NewsDetailPage from '../pages/Home/News/NewsDetailPage';
 import DiscussionsPage from '../pages/Home/Discussions/DiscussionsPage';
 import ReviewsPage from '../pages/Home/Reviews/ReviewsPage';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: 'news',
         element: <NewsPage />,
+      },
+      {
+        path: 'news/:id',
+        element: <NewsDetailPage />,
       },
       {
         path: 'reviews',
