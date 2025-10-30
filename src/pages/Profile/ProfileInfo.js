@@ -23,11 +23,9 @@ const ProfileInfo = () => {
   }, [userData, form]);
 
   const handleUpload = async (file) => {
-    // 使用FileReader将本地图片转换为Base64
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        // 将Base64图片数据保存到状态中
         setTempAvatar(e.target.result);
         resolve({ status: 'done', url: e.target.result });
       };
@@ -44,30 +42,26 @@ const ProfileInfo = () => {
       const values = await form.validateFields();
       // 处理用户名和个人简介字段
       const { username, bio } = values;
-      // 模拟API调用
-      setTimeout(() => {
-        const updatedUser = { 
-          ...userData, 
-          username,
-          bio,
-          // 如果有临时头像，则更新头像
-          ...(tempAvatar && { avatar: tempAvatar })
-        };
-        // 同时更新Redux和AuthContext中的用户信息
-        dispatch(setCurrentUser(updatedUser));
-        updateUser({ 
-          username, 
-          bio, 
-          ...(tempAvatar && { avatar: tempAvatar }) 
-        });
-        // 清空临时头像
-        setTempAvatar(null);
-        message.success('个人信息更新成功');
-        setIsEditing(false);
-        setLoading(false);
-      }, 1000);
+      
+      // 构建更新数据
+      const updateData = { 
+        username, 
+        bio, 
+        // 如果有临时头像，则更新头像
+        ...(tempAvatar && { avatar: tempAvatar }) 
+      };
+      
+      // 调用updateUser函数更新用户信息（已修改为调用后端API）
+      await updateUser(updateData);
+      
+      // 清空临时头像
+      setTempAvatar(null);
+      message.success('个人信息更新成功');
+      setIsEditing(false);
     } catch (error) {
-      message.error('更新失败，请检查输入信息');
+      console.error('更新用户信息失败:', error);
+      message.error(error.message || '更新失败，请检查输入信息');
+    } finally {
       setLoading(false);
     }
   };

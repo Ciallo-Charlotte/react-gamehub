@@ -145,7 +145,23 @@ export const AuthProvider = ({ children }) => {
   const updateUser = async (updates) => {
     setIsLoading(true);
     try {
-      const updatedUser = { ...user, ...updates };
+      // 调用后端API更新用户信息
+      const response = await fetch(`http://localhost:5000/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || '更新用户信息失败');
+      }
+      
+      // 更新本地状态
+      const updatedUser = { ...user, ...data };
       setUser(updatedUser);
       // 更新本地存储
       localStorage.setItem('userInfo', JSON.stringify(updatedUser));
